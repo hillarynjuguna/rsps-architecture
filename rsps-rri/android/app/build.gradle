@@ -1,0 +1,94 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'com.google.devtools.ksp'
+}
+
+android {
+    namespace 'com.rsps'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.rsps"
+        minSdk 26          // Android 8.0 — AccessibilityService API stability floor
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.0-phase1"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // Room schema export location for migration tracking
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += ["room.schemaLocation": "$projectDir/schemas"]
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField "boolean", "ENABLE_LOGGING", "true"
+            buildConfigField "String",  "ORCHESTRATION_API_URL", '"http://10.0.2.2:8000"'
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "boolean", "ENABLE_LOGGING", "false"
+            buildConfigField "String",  "ORCHESTRATION_API_URL", '"https://your-server.com"'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+        freeCompilerArgs += ["-opt-in=kotlin.RequiresOptIn"]
+    }
+    buildFeatures {
+        viewBinding true
+        buildConfig true
+    }
+}
+
+dependencies {
+    // ─── Core Kotlin / Coroutines ────────────────────────────────────────
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0'
+    implementation 'androidx.core:core-ktx:1.13.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
+
+    // ─── Room (ρ-archive persistence layer) ──────────────────────────────
+    implementation 'androidx.room:room-runtime:2.6.1'
+    implementation 'androidx.room:room-ktx:2.6.1'
+    ksp 'androidx.room:room-compiler:2.6.1'
+
+    // ─── WorkManager (IDSWorker nightly scheduling) ───────────────────────
+    implementation 'androidx.work:work-runtime-ktx:2.9.0'
+
+    // ─── UI ──────────────────────────────────────────────────────────────
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    implementation 'androidx.fragment:fragment-ktx:1.6.2'
+
+    // ─── Networking (orchestration API calls) ────────────────────────────
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+    // ─── Phase 2: MediaPipe (Gemma on-device inference) ──────────────────
+    // Uncomment when enabling Phase 2 IDS inference
+    // implementation 'com.google.mediapipe:tasks-genai:0.10.14'
+
+    // ─── Testing ─────────────────────────────────────────────────────────
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0'
+    testImplementation 'androidx.room:room-testing:2.6.1'
+    testImplementation 'io.mockk:mockk:1.13.10'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.room:room-testing:2.6.1'
+}

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- RSPS colour palette — cognitive infrastructure aesthetic -->
+    <!-- Deep dark tones that reduce visual noise, accent colours for signal states -->
+
+    <color name="rsps_background">#0D0F14</color>      <!-- Near-black — minimal visual noise -->
+    <color name="rsps_surface">#161A22</color>          <!-- Card surfaces -->
+    <color name="rsps_midnight">#0A0C10</color>         <!-- Deepest tone — status bars -->
+    <color name="rsps_deep_blue">#1E3A5F</color>        <!-- Primary — structural presence -->
+    <color name="rsps_off_white">#E8EDF4</color>        <!-- Primary text -->
+    <color name="rsps_muted">#6B7280</color>            <!-- Secondary text -->
+
+    <!-- Signal colours: IDS synthesis readiness levels -->
+    <color name="rsps_teal">#2DD4BF</color>             <!-- High readiness — crystallise -->
+    <color name="rsps_amber">#F59E0B</color>            <!-- Moderate — building -->
+    <color name="rsps_low_blue">#60A5FA</color>         <!-- Active — tracking -->
+    <color name="rsps_grey_signal">#4B5563</color>      <!-- Inactive / low -->
+
+    <!-- Triangle Residue congruence levels -->
+    <color name="rsps_flat_green">#34D399</color>       <!-- FLAT: κ < 0.10 -->
+    <color name="rsps_marginal_blue">#60A5FA</color>    <!-- MARGINAL: κ < 0.20 -->
+    <color name="rsps_hold_amber">#FBBF24</color>       <!-- HOLD: κ < 0.35 -->
+    <color name="rsps_escher_red">#F87171</color>       <!-- ESCHER: κ ≥ 0.35 -->
+
+    <!-- DCFB flag colours -->
+    <color name="dcfb_fear">#FB923C</color>             <!-- Fear signature -->
+    <color name="dcfb_ego">#C084FC</color>              <!-- Ego signature -->
+    <color name="dcfb_bias">#F472B6</color>             <!-- Bias signature -->
+    <color name="dcfb_clean">#34D399</color>            <!-- Clean — no flags -->
+
+    <!-- RedLine -->
+    <color name="redline_active">#EF4444</color>        <!-- RedLine bypass active -->
+</resources>

@@ -1,0 +1,26 @@
+# Android
+/android/.gradle/
+/android/app/build/
+/android/.idea/
+*.iml
+local.properties
+.gradle/
+/captures/
+.externalNativeBuild
+
+# Kotlin / Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Python
+/orchestration/venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+
+# General
+.DS_Store
+*.log

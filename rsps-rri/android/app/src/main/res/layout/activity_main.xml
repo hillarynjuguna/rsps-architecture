@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/rsps_background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- ═══ HEADER ════════════════════════════════════════════════════ -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="RSPS"
+            android:textSize="11sp"
+            android:textColor="@color/rsps_muted"
+            android:letterSpacing="0.15"
+            android:layout_marginBottom="2dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cognitive Infrastructure"
+            android:textSize="20sp"
+            android:textColor="@color/rsps_off_white"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- ═══ SERVICE STATUS ════════════════════════════════════════════ -->
+        <TextView
+            android:id="@+id/tv_observatory_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:padding="8dp"
+            android:layout_marginBottom="4dp"
+            android:background="#1A1E28"
+            android:textColor="@color/rsps_flat_green"/>
+        <Button
+            android:id="@+id/btn_grant_observatory"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Grant Notification Access"
+            android:visibility="gone"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tv_witness_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:padding="8dp"
+            android:layout_marginBottom="4dp"
+            android:background="#1A1E28"
+            android:textColor="@color/rsps_flat_green"/>
+        <Button
+            android:id="@+id/btn_grant_witness"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Grant Accessibility Access"
+            android:visibility="gone"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- ═══ τ-ANCHOR ══════════════════════════════════════════════════ -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="τ-ANCHOR"
+            android:textSize="10sp"
+            android:textColor="@color/rsps_muted"
+            android:letterSpacing="0.15"
+            android:layout_marginBottom="6dp"/>
+
+        <EditText
+            android:id="@+id/et_ache_vector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/ache_vector_hint"
+            android:textColor="@color/rsps_off_white"
+            android:textColorHint="@color/rsps_muted"
+            android:background="#1A1E28"
+            android:padding="12dp"
+            android:inputType="textMultiLine"
+            android:minLines="2"
+            android:layout_marginBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
+            <Button
+                android:id="@+id/btn_set_ache"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Set τ-Lock"
+                android:backgroundTint="@color/rsps_deep_blue"
+                android:layout_marginEnd="12dp"/>
+            <TextView
+                android:id="@+id/tv_tau_lock_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="τ-Lock not set"
+                android:textSize="12sp"
+                android:textColor="@color/rsps_muted"/>
+        </LinearLayout>
+
+        <!-- ═══ IDS SCORE ═════════════════════════════════════════════════ -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="IDS"
+            android:textSize="10sp"
+            android:textColor="@color/rsps_muted"
+            android:letterSpacing="0.15"
+            android:layout_marginBottom="6dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+            <TextView
+                android:id="@+id/tv_ids_score"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="—"
+                android:textSize="42sp"
+                android:textStyle="bold"
+                android:textColor="@color/rsps_teal"
+                android:layout_marginEnd="16dp"/>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/tv_ids_readiness"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="—"
+                    android:textSize="14sp"
+                    android:textColor="@color/rsps_off_white"
+                    android:layout_marginBottom="4dp"/>
+                <TextView
+                    android:id="@+id/tv_primary_cluster"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="—"
+                    android:textSize="12sp"
+                    android:textColor="@color/rsps_muted"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progress_ids"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:max="100"
+            android:progress="0"
+            android:progressTint="@color/rsps_teal"
+            android:progressBackgroundTint="@color/rsps_surface"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- ═══ MEMBRANE STATUS ═══════════════════════════════════════════ -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MEMBRANE"
+            android:textSize="10sp"
+            android:textColor="@color/rsps_muted"
+            android:letterSpacing="0.15"
+            android:layout_marginBottom="6dp"/>
+
+        <TextView
+            android:id="@+id/tv_buffer_weight"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Loading…"
+            android:textSize="13sp"
+            android:textColor="@color/rsps_off_white"
+            android:padding="8dp"
+            android:background="#1A1E28"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- ═══ CDP PROGRESS ══════════════════════════════════════════════ -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CDP"
+            android:textSize="10sp"
+            android:textColor="@color/rsps_muted"
+            android:letterSpacing="0.15"
+            android:layout_marginBottom="6dp"/>
+
+        <TextView
+            android:id="@+id/tv_cdp_day"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Day — / 90"
+            android:textSize="16sp"
+            android:textColor="@color/rsps_off_white"
+            android:layout_marginBottom="32dp"/>
+
+    </LinearLayout>
+</ScrollView>

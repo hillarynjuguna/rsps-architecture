@@ -1,0 +1,157 @@
+{
+  "name": "RSPS Multi-Model Orchestration",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rsps-orchestrate",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "τ-Anchor Input",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "notes": "Entry point. Body: {ache_signal, prompt, models[], session_id, ids_score?, primary_cluster?}"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\nif (!body.ache_signal || !body.ache_signal.trim()) {\n  throw new Error('τ-anchor required: ache_signal cannot be empty. Manifold Autarky risk.');\n}\nconst sessionId = body.session_id || `session_${Date.now()}_${Math.floor(Math.random()*9999)}`;\nreturn [{\n  json: {\n    tau: {\n      ache_signal: body.ache_signal,\n      mortal_asymmetry: 1,\n      ids_score: body.ids_score || null,\n      primary_cluster: body.primary_cluster || null\n    },\n    prompt: body.prompt,\n    models: body.models || ['claude-sonnet-4-6', 'gpt-4o', 'deepseek-chat'],\n    session_id: sessionId,\n    timestamp: Date.now()\n  }\n}];"
+      },
+      "id": "validate-tau",
+      "name": "Validate τ-Vector",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst cmcp = {\n  version: '1.0',\n  session_id: data.session_id,\n  tau_anchor: { ache_vector: data.tau.ache_signal, mortal_asymmetry: 1 },\n  ids_context: { score: data.tau.ids_score, cluster: data.tau.primary_cluster },\n  constitutional_clauses: ['clause_005'],\n  timestamp: data.timestamp\n};\nconst forClaude = (p) => `<rsps_context version=\"${p.version}\">\\n<tau_anchor>\\n  <ache_vector>${p.tau_anchor.ache_vector}</ache_vector>\\n  <session>${p.session_id}</session>\\n</tau_anchor>\\n<ids_context><score>${p.ids_context.score || 'N/A'}</score><cluster>${p.ids_context.cluster || 'N/A'}</cluster></ids_context>\\n</rsps_context>\\n\\n`;\nconst forDefault = (p) => `[RSPS CONTEXT | session:${p.session_id}]\\nTAU_INTENT: ${p.tau_anchor.ache_vector}\\nIDS: ${p.ids_context.score || 'N/A'} | CLUSTER: ${p.ids_context.cluster || 'N/A'}\\n---\\n\\n`;\nreturn [{\n  json: {\n    ...data,\n    cmcp_packet: cmcp,\n    prompts: {\n      claude: forClaude(cmcp) + data.prompt,\n      default: forDefault(cmcp) + data.prompt\n    }\n  }\n}];"
+      },
+      "id": "build-cmcp",
+      "name": "Build CMCP (Layer 9)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst models = data.models.slice(0, 3);\nreturn models.map((modelId, i) => ({\n  json: {\n    ...data,\n    _target_model: modelId,\n    _branch_index: i,\n    _prompt: modelId.includes('claude') ? data.prompts.claude : data.prompts.default\n  }\n}));"
+      },
+      "id": "split-branches",
+      "name": "Split → 3 Model Branches",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "HTTP-Referer", "value": "https://rsps-rri.local" },
+            { "name": "X-Title", "value": "RSPS-RRI Orchestration" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"{{ $json._target_model }}\",\n  \"messages\": [{\"role\": \"user\", \"content\": \"{{ $json._prompt }}\"}],\n  \"max_tokens\": 1500\n}",
+        "options": { "timeout": 60000 }
+      },
+      "id": "call-openrouter",
+      "name": "Call OpenRouter",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst content = item.choices?.[0]?.message?.content || `[ERROR: No response from ${item._target_model}]`;\nconst wordCount = Math.max(1, content.split(/\\s+/).length);\nconst fearP = [/\\bI (cannot|can't|won't|am unable to)\\b/gi, /\\b(dangerous|harmful) (to|for)\\b/gi];\nconst egoP  = [/\\b(clearly|obviously|certainly|undoubtedly)\\b/gi, /\\bThere is no doubt\\b/gi];\nconst biasP = [/\\b(normal|typical|standard) (person|people)\\b/gi];\nconst count = (text, patterns) => patterns.reduce((n, p) => n + (text.match(p)||[]).length, 0);\nconst fearScore = Math.min(1, count(content, fearP) / (wordCount * 0.015));\nconst egoScore  = Math.min(1, count(content, egoP)  / (wordCount * 0.015));\nconst biasScore = Math.min(1, count(content, biasP) / (wordCount * 0.010));\nconst conf = Math.max(0.1, 1 - (fearScore * 0.9 + egoScore * 1.3 + biasScore * 0.8) / 3);\nconst flags = [];\nif (fearScore > 0.25) flags.push(`FEAR(${fearScore.toFixed(2)})`);\nif (egoScore  > 0.20) flags.push(`EGO(${egoScore.toFixed(2)})`);\nif (biasScore > 0.25) flags.push(`BIAS(${biasScore.toFixed(2)})`);\nreturn [{ json: {\n  model_id: item._target_model || 'unknown',\n  content,\n  dcfb: { fear_score: fearScore, ego_score: egoScore, bias_score: biasScore, confidence_weight: conf, flags },\n  _session_id: item._session_id,\n  _branch_index: item._branch_index\n}}];"
+      },
+      "id": "dcfb-filter",
+      "name": "DCFB Filter",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "id": "merge-outputs",
+      "name": "Merge 3 Outputs",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nif (items.length < 3) {\n  return [{ json: { error: `Need 3 outputs, got ${items.length}`, outputs: items.map(i=>i.json) } }];\n}\nconst outputs = items.slice(0,3).map(i => i.json);\nconst [a, b, c] = outputs;\nconst wordVec = (text) => {\n  const words = text.toLowerCase().match(/\\b\\w{4,}\\b/g) || [];\n  const freq = {};\n  words.forEach(w => freq[w] = (freq[w]||0)+1);\n  return freq;\n};\nconst cosine = (va, vb) => {\n  const keys = new Set([...Object.keys(va), ...Object.keys(vb)]);\n  let dot=0, na=0, nb=0;\n  keys.forEach(k => { const x=va[k]||0, y=vb[k]||0; dot+=x*y; na+=x*x; nb+=y*y; });\n  return na&&nb ? dot/(Math.sqrt(na)*Math.sqrt(nb)) : 0;\n};\nconst wA=a.dcfb?.confidence_weight||1, wB=b.dcfb?.confidence_weight||1, wC=c.dcfb?.confidence_weight||1;\nconst vA=wordVec(a.content||''), vB=wordVec(b.content||''), vC=wordVec(c.content||'');\nconst simAB=cosine(vA,vB)*((wA+wB)/2);\nconst simBC=cosine(vB,vC)*((wB+wC)/2);\nconst simCA=cosine(vC,vA)*((wC+wA)/2);\nconst gm = Math.pow(Math.max(0,simAB)*Math.max(0,simBC)*Math.max(0,simCA), 1/3);\nconst kappa = Math.min(1, Math.max(0, 1-gm));\nconst level = kappa<0.10?'FLAT':kappa<0.20?'MARGINAL':kappa<0.35?'HOLD':'ESCHER';\nconst pairSims = {'A↔B':simAB,'B↔C':simBC,'C↔A':simCA};\nconst weakest = Object.entries(pairSims).sort((x,y)=>x[1]-y[1])[0][0];\nreturn [{ json: {\n  session_id: a._session_id,\n  triangle_residue: {\n    kappa: parseFloat(kappa.toFixed(4)),\n    level,\n    is_congruent: ['FLAT','MARGINAL'].includes(level),\n    sim_ab: parseFloat(simAB.toFixed(4)),\n    sim_bc: parseFloat(simBC.toFixed(4)),\n    sim_ca: parseFloat(simCA.toFixed(4)),\n    weakest_link: weakest\n  },\n  outputs: outputs.map(o => ({ model_id:o.model_id, content:o.content, dcfb_confidence:o.dcfb?.confidence_weight, flags:o.dcfb?.flags||[] }))\n}}];"
+      },
+      "id": "triangle-residue",
+      "name": "Triangle Residue Test (κ)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1780, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst tr = data.triangle_residue;\nconst violations = [];\nconst clauses_checked = ['clause_003', 'clause_005'];\nif (!tr.is_congruent && !tr.weakest_link) {\n  violations.push('clause_005: Rejection pending without structural analysis');\n}\nconst r_score = violations.length === 0 ? (tr.is_congruent ? 1.0 : 0.75) : 0.30;\nconst outcome = violations.length>0 ? 'FAILED' : r_score>=0.75 ? 'PASSED' : 'DEFERRED';\nconst bestOutput = data.outputs.reduce((best, o) => \n  (o.dcfb_confidence||0) > (best.dcfb_confidence||0) ? o : best, data.outputs[0]);\nreturn [{ json: {\n  ...data,\n  aurora: { r_score, clauses_checked, violations, outcome },\n  recommended_synthesis: `[${bestOutput?.model_id}]: ${bestOutput?.content?.slice(0,200)}...`\n}}];"
+      },
+      "id": "aurora-verify",
+      "name": "AURORA Verification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst tr = data.triangle_residue;\nreturn [{ json: {\n  session_id: data.session_id,\n  outputs: data.outputs,\n  triangle_residue: tr,\n  aurora: data.aurora,\n  recommended_synthesis: data.recommended_synthesis,\n  tau_review_required: ['HOLD','ESCHER'].includes(tr.level),\n  cmcp_next: {\n    session_id: data.session_id,\n    prior_kappa: tr.kappa,\n    prior_level: tr.level,\n    aurora_outcome: data.aurora.outcome\n  },\n  timestamp: Date.now()\n}}];"
+      },
+      "id": "build-response",
+      "name": "Build Final Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2220, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2440, 300]
+    }
+  ],
+  "connections": {
+    "τ-Anchor Input":          { "main": [[{ "node": "Validate τ-Vector",          "type": "main", "index": 0 }]] },
+    "Validate τ-Vector":       { "main": [[{ "node": "Build CMCP (Layer 9)",        "type": "main", "index": 0 }]] },
+    "Build CMCP (Layer 9)":    { "main": [[{ "node": "Split → 3 Model Branches",   "type": "main", "index": 0 }]] },
+    "Split → 3 Model Branches":{ "main": [[{ "node": "Call OpenRouter",             "type": "main", "index": 0 }]] },
+    "Call OpenRouter":         { "main": [[{ "node": "DCFB Filter",                 "type": "main", "index": 0 }]] },
+    "DCFB Filter":             {
+      "main": [
+        [{ "node": "Merge 3 Outputs", "type": "main", "index": 0 }],
+        [{ "node": "Merge 3 Outputs", "type": "main", "index": 1 }],
+        [{ "node": "Merge 3 Outputs", "type": "main", "index": 2 }]
+      ]
+    },
+    "Merge 3 Outputs":         { "main": [[{ "node": "Triangle Residue Test (κ)",  "type": "main", "index": 0 }]] },
+    "Triangle Residue Test (κ)":{ "main": [[{ "node": "AURORA Verification",        "type": "main", "index": 0 }]] },
+    "AURORA Verification":     { "main": [[{ "node": "Build Final Response",         "type": "main", "index": 0 }]] },
+    "Build Final Response":    { "main": [[{ "node": "Respond",                      "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "rsps-error-handler"
+  },
+  "tags": ["rsps", "rri", "multi-model", "orchestration"]
+}

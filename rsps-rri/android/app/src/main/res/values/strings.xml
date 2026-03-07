@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RSPS</string>
+
+    <!-- Dashboard strings -->
+    <string name="dashboard_title">Witness Dashboard</string>
+    <string name="ids_label">IDS Score</string>
+    <string name="ids_not_available">No score yet — first run at 2 AM</string>
+    <string name="buffer_label">Membrane Buffer</string>
+    <string name="buffer_empty">Buffer clear</string>
+    <string name="cdp_day_label">CDP Day</string>
+    <string name="cluster_label">Primary Cluster</string>
+    <string name="synthesis_label">Synthesis Readiness</string>
+
+    <!-- Service status -->
+    <string name="observatory_active">Observatory: Active</string>
+    <string name="observatory_inactive">Observatory: Inactive — grant notification access</string>
+    <string name="witness_active">Witness: Active</string>
+    <string name="witness_inactive">Witness: Inactive — grant accessibility access</string>
+
+    <!-- Notifications -->
+    <string name="observatory_channel_name">RSPS Observatory</string>
+    <string name="observatory_channel_desc">Epistemic membrane — notification gating</string>
+    <string name="witness_channel_name">RSPS Witness</string>
+    <string name="witness_channel_desc">Behavioral signal layer — attention tracking</string>
+    <string name="notification_content">Cognitive infrastructure running</string>
+
+    <!-- Permissions prompt -->
+    <string name="grant_notification_access">Grant notification access to activate the Observatory</string>
+    <string name="grant_accessibility_access">Grant accessibility access to activate the Witness</string>
+    <string name="settings_button">Open Settings</string>
+
+    <!-- IDS synthesis readiness labels -->
+    <string name="readiness_high">High — consider crystallising</string>
+    <string name="readiness_moderate">Moderate — continue metabolising</string>
+    <string name="readiness_building">Building — deepen engagement</string>
+    <string name="readiness_low">Low — tighten membrane</string>
+
+    <!-- Ache vector input -->
+    <string name="ache_vector_hint">What are you working on right now? (τ-anchor)</string>
+    <string name="ache_vector_set">τ-Lock active</string>
+    <string name="ache_vector_stale">τ-Lock stale — re-anchor recommended</string>
+</resources>

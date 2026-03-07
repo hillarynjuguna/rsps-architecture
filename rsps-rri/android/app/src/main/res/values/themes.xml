@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.RSPS" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Primary palette: dark cognitive infrastructure aesthetic -->
+        <item name="colorPrimary">@color/rsps_deep_blue</item>
+        <item name="colorPrimaryVariant">@color/rsps_midnight</item>
+        <item name="colorOnPrimary">@color/rsps_off_white</item>
+        <item name="colorSecondary">@color/rsps_teal</item>
+        <item name="colorOnSecondary">@color/rsps_midnight</item>
+        <item name="colorSurface">@color/rsps_surface</item>
+        <item name="colorOnSurface">@color/rsps_off_white</item>
+        <item name="colorBackground">@color/rsps_background</item>
+        <item name="android:colorBackground">@color/rsps_background</item>
+        <item name="colorError">@color/rsps_escher_red</item>
+
+        <item name="android:statusBarColor">@color/rsps_midnight</item>
+        <item name="android:navigationBarColor">@color/rsps_midnight</item>
+    </style>
+</resources>
