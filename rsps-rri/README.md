@@ -81,6 +81,42 @@ cp .env.example .env  # Add your OPENROUTER_API_KEY or MISTRAL_API_KEY
 uvicorn api.main:app --reload
 ```
 
+#### Deploying the orchestrator
+
+The service can be hosted on any Python-capable platform; a convenient
+option is [Vercel](https://vercel.com/).  A simple `vercel.json` has been
+added to this repository which configures the FastAPI app as a serverless
+function:
+
+```json
+{
+  "version": 2,
+  "builds": [
+    {"src": "api/main.py", "use": "@vercel/python"}
+  ],
+  "routes": [
+    {"src": "/(.*)", "dest": "api/main.py"}
+  ]
+}
+```
+
+To deploy:
+
+```bash
+cd orchestration
+vercel login          # if not already logged in
+vercel --prod         # deploys using the configuration above
+```
+
+You may need to set environment variables (`OPENROUTER_API_KEY`,
+`MISTRAL_API_KEY`, etc.) via the Vercel dashboard or `vercel env add`.
+
+The Vercel-hosted endpoint can then be used by the Android app via
+`ANDROID_API_URL`.
+
+*Note*: serverless cold starts may be significant; for low-latency
+experiments you might prefer a small VM (e.g. Render, DigitalOcean, etc.).
+
 *The orchestrator supports both OpenRouter‑compatible providers and direct
 Mistral API calls.  Set `MISTRAL_API_KEY`/`MISTRAL_MODEL` in `.env` to use
 Mistral; leave both blank to receive mocked responses useful during rapid
