@@ -75,9 +75,16 @@ rsps-rri/
 cd orchestration
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env  # Add your OPENROUTER_API_KEY
+cp .env.example .env  # Add your OPENROUTER_API_KEY or MISTRAL_API_KEY
+# (Mistral is free and useful for early development; the service will
+# automatically prefer it when MISTRAL_API_KEY is present.)
 uvicorn api.main:app --reload
 ```
+
+*The orchestrator supports both OpenRouter‑compatible providers and direct
+Mistral API calls.  Set `MISTRAL_API_KEY`/`MISTRAL_MODEL` in `.env` to use
+Mistral; leave both blank to receive mocked responses useful during rapid
+iteration.*
 
 ### n8n Workflow
 ```bash

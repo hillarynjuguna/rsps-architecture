@@ -268,7 +268,13 @@ async def orchestrate(request: OrchestrationRequest, background_tasks: Backgroun
     serializer = app.state.cmcp_serializer
 
     async def call_model(model_id: str) -> tuple[str, str]:
-        """Call a single model via OpenRouter, returning (model_id, response_text)."""
+        """Call a single model, choosing provider based on environment.
+
+        Preference order:
+        1. Mistral (if MISTRAL_API_KEY set)
+        2. OpenRouter (if OPENROUTER_API_KEY set)
+        3. mock response otherwise
+        """
         prompt = request.prompt
         if request.inject_cmcp and model_id in cmcp_packets:
             prompt = serializer.inject_into_prompt(
@@ -276,7 +282,11 @@ async def orchestrate(request: OrchestrationRequest, background_tasks: Backgroun
             )
 
         try:
-            response_text = await _call_openrouter(model_id, prompt)
+            # choose which helper to invoke
+            if os.getenv("MISTRAL_API_KEY"):
+                response_text = await _call_mistral(model_id, prompt)
+            else:
+                response_text = await _call_openrouter(model_id, prompt)
             return model_id, response_text
         except Exception as e:
             logger.error(f"Model call failed [{model_id}]: {e}")
@@ -480,8 +490,47 @@ async def get_rho_archive():
 # PRIVATE HELPERS
 # ─────────────────────────────────────────────────────────────────────────────
 
+async def _call_mistral(model_id: str, prompt: str) -> str:
+    """Call the Mistral AI HTTP API.
+
+    The free tier endpoint accepts a simple JSON payload; the response
+    body contains an `output` list whose first element is the generated
+    text.  We accept `model_id` for compatibility but the actual model
+    name can be overridden with MISTRAL_MODEL.
+    """
+    api_key = os.getenv("MISTRAL_API_KEY")
+    if not api_key:
+        return f"[MOCK RESPONSE from {model_id}]: set MISTRAL_API_KEY to enable real calls."
+
+    model_name = os.getenv("MISTRAL_MODEL", model_id)
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        response = await client.post(
+            "https://api.mistral.ai/runs",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": model_name,
+                "input": prompt,
+            },
+        )
+        response.raise_for_status()
+        data = response.json()
+        # Mistral returns output as a list of strings
+        output = data.get("output")
+        if isinstance(output, list) and output:
+            return output[0]
+        return ""
+
+
 async def _call_openrouter(model_id: str, prompt: str) -> str:
-    """Call OpenRouter API (OpenAI-compatible endpoint)."""
+    """Call OpenRouter API (OpenAI-compatible endpoint).
+
+    This helper remains available for backward compatibility, but the
+    higher‑level orchestration code now chooses between OpenRouter and
+    Mistral based on the presence of an environment variable.
+    """
     api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
         # Return mock response if no API key configured
